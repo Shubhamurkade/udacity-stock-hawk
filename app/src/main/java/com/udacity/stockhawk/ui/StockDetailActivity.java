@@ -69,8 +69,8 @@ public class StockDetailActivity extends AppCompatActivity {
         System.out.println(points);
         LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dbPoint);
         graph.addSeries(series);
-        graph.getViewport().setMinX(new Date().getTime());
-        graph.getViewport().setMaxX(new Date().getTime());
+        //graph.getViewport().setMinX(new Date().getTime());
+        //graph.getViewport().setMaxX(new Date().getTime());
         graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this));
         graph.getGridLabelRenderer().setNumHorizontalLabels(3);
         // set manual x bounds to have nice steps
@@ -79,6 +79,10 @@ public class StockDetailActivity extends AppCompatActivity {
 
         // as we use dates as labels, the human rounding to nice readable numbers
         // is not necessary
+        graph.getViewport().setScrollable(true); // enables horizontal scrolling
+        graph.getViewport().setScrollableY(true); // enables vertical scrolling
+        graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
+        graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
         graph.getGridLabelRenderer().setHumanRounding(false);
 
         /*
