@@ -1,12 +1,21 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
@@ -22,6 +31,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -54,70 +64,48 @@ public class StockDetailActivity extends AppCompatActivity {
             String[] allStocks = history.split("\n");
             String[] singleStock;
 
-        ArrayList<DataPoint> points = new ArrayList<>();
-        GraphView graph = (GraphView) findViewById(R.id.graph);
+        LineChart chart = (LineChart) findViewById(R.id.chart);
 
-        for(int i=0; i<3; i++)
+        List<Entry> entries = new ArrayList<Entry>();
+
+        final String [] dateString = new String[allStocks.length];
+        for(int i=0; i<allStocks.length; i++)
             {
                 singleStock = allStocks[i].split(",");
                 Date date = new Date(Long.parseLong(singleStock[0]));
                 System.out.println(date);
-                points.add(new DataPoint(new Date(Long.parseLong(singleStock[0])), Float.parseFloat(singleStock[1])));
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+                entries.add(new Entry(i, Float.parseFloat(singleStock[1])));
+                dateString[allStocks.length -1 - i] = df.format(date);
+                System.out.println(i);
             }
 
-        DataPoint[] dbPoint = points.toArray(new DataPoint[points.size()]);
-        System.out.println(points);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dbPoint);
-        graph.addSeries(series);
-        //graph.getViewport().setMinX(new Date().getTime());
-        //graph.getViewport().setMaxX(new Date().getTime());
-        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this));
-        graph.getGridLabelRenderer().setNumHorizontalLabels(3);
-        // set manual x bounds to have nice steps
+        IAxisValueFormatter formatter = new IAxisValueFormatter() {
 
-        graph.getViewport().setXAxisBoundsManual(true);
 
-        // as we use dates as labels, the human rounding to nice readable numbers
-        // is not necessary
-        graph.getViewport().setScrollable(true); // enables horizontal scrolling
-        graph.getViewport().setScrollableY(true); // enables vertical scrolling
-        graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-        graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
-        graph.getGridLabelRenderer().setHumanRounding(false);
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return dateString[(int) value];
+            }
 
-        /*
-        Calendar calendar = Calendar.getInstance();
-        Date d1 = calendar.getTime();
-        calendar.add(Calendar.DATE, 1);
-        Date d2 = calendar.getTime();
-        calendar.add(Calendar.DATE, 1);
-        Date d3 = calendar.getTime();
+            // we don't draw numbers, so no decimal digits needed
+        };
+        LineDataSet dataSet = new LineDataSet(entries, "Label");
+        LineData lineData = new LineData(dataSet);
+        System.out.println(formatter);
+        chart.setData(lineData);
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
+        xAxis.setValueFormatter(formatter);
+        xAxis.setTextColor(Color.WHITE);
 
-        GraphView graph = (GraphView) findViewById(R.id.graph);
+        YAxis leftAxis = chart.getAxisLeft();
+        leftAxis.setTextColor(Color.WHITE);
 
-// you can directly pass Date objects to DataPoint-Constructor
-// this will convert the Date to double via Date#getTime()
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(d1, 1),
-                new DataPoint(d2, 5),
-                new DataPoint(d3, 3)
-        });
+        YAxis rightAxis = chart.getAxisRight();
+        rightAxis.setTextColor(Color.WHITE);
+        chart.invalidate();
 
-        graph.addSeries(series);
 
-// set date label formatter
-        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this));
-        graph.getGridLabelRenderer().setNumHorizontalLabels(3); // only 4 because of the space
-
-// set manual x bounds to have nice steps
-        graph.getViewport().setMinX(d1.getTime());
-        graph.getViewport().setMaxX(d3.getTime());
-        graph.getViewport().setXAxisBoundsManual(true);
-
-// as we use dates as labels, the human rounding to nice readable numbers
-// is not necessary
-        graph.getGridLabelRenderer().setHumanRounding(false);
-
-    */
     }
 }
